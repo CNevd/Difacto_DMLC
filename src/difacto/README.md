@@ -24,6 +24,6 @@ sh run_local.sh
 ```
 
 ## More
-
+- Configuration: [difacto](../../doc/learn/difacto.rst)
 - [Tutorial for the Criteo Kaggle CTR competition](http://wormhole.readthedocs.org/en/latest/tutorial/criteo_kaggle.html)
 - [User Guide](http://wormhole.readthedocs.org/en/latest/learn/difacto.html)
