@@ -10,8 +10,8 @@
 #----------------------------------------------------
 
 # choice of compiler
-export CC = /data1/home/wangchao/gcc-4.8.2/bin/gcc-4.8
-export CXX = /data1/home/wangchao/gcc-4.8.2/bin/g++-4.8
+export CC = gcc
+export CXX = g++
 export MPICXX = mpicxx
 
 # whether to compile with -fPIC option
@@ -19,7 +19,7 @@ export MPICXX = mpicxx
 WITH_FPIC = 1
 
 # whether use HDFS support during compile
-USE_HDFS = 1
+USE_HDFS = 0
 
 # whether use AWS S3 support during compile
 USE_S3 = 0

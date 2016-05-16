@@ -37,23 +37,25 @@ ifndef HADOOP_HDFS_HOME
 	HADOOP_HDFS_HOME=${HADOOP_HOME}
 endif
 
-ifndef HDFS_INC_PATH
-	HDFS_INC_PATH=${HADOOP_HDFS_HOME}/include
-endif
-ifndef HDFS_LIB_PATH
-	HDFS_LIB_PATH=${HADOOP_HDFS_HOME}/lib/native
-endif
+ifeq ($(USE_HDFS),1)                                                      
+        ifndef HDFS_INC_PATH                                              
+                HDFS_INC_PATH=$(HADOOP_HDFS_HOME)/include                 
+        endif                                                             
+        ifndef HDFS_LIB_PATH                                              
+                HDFS_LIB_PATH=$(HADOOP_HDFS_HOME)/lib/native              
+        endif                                                             
+                                                                          
+        DMLC_CFLAGS+= -DDMLC_USE_HDFS=1 -I$(HDFS_INC_PATH) -I$(JAVA_HOME)/include 
 
-DMLC_CFLAGS+= -DDMLC_USE_HDFS=1 -I${HDFS_INC_PATH} -I${JAVA_HOME}/include
-
-#ifneq ("$(wildcard $(HDFS_LIB_PATH)/libhdfs.so)","")
-DMLC_LDFLAGS+= -L${HDFS_LIB_PATH} -lhdfs
-#else
-#	DMLC_LDFLAGS+= $(HDFS_LIB_PATH)/libhdfs.a
-#endif
-DMLC_LDFLAGS += -L$(LIBJVM) -ljvm -Wl,-rpath=$(LIBJVM)
-
-
+        ifneq ("$(wildcard $(HDFS_LIB_PATH)/libhdfs.so)","")              
+                DMLC_LDFLAGS+= -L$(HDFS_LIB_PATH) -lhdfs
+        else    
+                DMLC_LDFLAGS+= $(HDFS_LIB_PATH)/libhdfs.a                 
+        endif   
+        DMLC_LDFLAGS += -L$(LIBJVM) -ljvm -Wl,-rpath=$(LIBJVM)            
+else    
+        DMLC_CFLAGS+= -DDMLC_USE_HDFS=0                                   
+endif   
 
 # setup S3
 ifeq ($(USE_S3),1)

@@ -8,7 +8,7 @@ DECLARE_int32(num_workers);
 DECLARE_int32(num_replicas);
 DECLARE_int32(report_interval);
 
-DEFINE_int32(sync_timeout, 10, "connection timeout in sec.");
+DEFINE_int32(sync_timeout, 500, "connection timeout in sec.");
 
 DEFINE_uint64(max_key, -1, "maximal global key");
 

@@ -42,7 +42,7 @@ if 'DMLC_HDFS_OPTS' in env:
 elif 'LIBHDFS_OPTS' not in env:
     env['LIBHDFS_OPTS'] = '--Xmx128m'
 
-env['LD_LIBRARY_PATH'] = '${LD_LIBRARY_PATH}:' + (':'.join(lpath)) + ':/data1/home/wangchao/gcc-4.8.2/lib64' 
+env['LD_LIBRARY_PATH'] = '${LD_LIBRARY_PATH}:' + (':'.join(lpath)) 
 
 ret = subprocess.call(args = sys.argv[1:], env = env)
 sys.exit(ret)
