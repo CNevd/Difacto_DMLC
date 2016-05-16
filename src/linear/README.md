@@ -15,6 +15,6 @@ sh run_local.sh
 
 ## More
 
-- Configuration: [difacto](../../doc/learn/linear.rst)
+- Configuration: [linear](../../doc/learn/linear.rst)
 - [Tutorial for the Criteo Kaggle CTR competition](http://wormhole.readthedocs.org/en/latest/tutorial/criteo_kaggle.html)
 - [User Guide](http://wormhole.readthedocs.org/en/latest/learn/linear.html)
