@@ -16,13 +16,43 @@ class Dump {
   ~Dump() {data_.clear();}
 
   // value type stored on sever nodes, can be also other Entrys
-  struct SGDEntry {
-    float w = 0;
-    inline void Load(Stream *fi) {
-      CHECK_EQ(fi->Read(&w, sizeof(float)), sizeof(float));
+  struct AdaGradEntry {
+
+    AdaGradEntry() { }
+    ~AdaGradEntry() { Clear(); }
+
+    inline void Clear() {
+      if ( size > 1 ) { delete [] w; delete [] sqc_grad; }
+      size = 0; w = NULL; sqc_grad = NULL;
     }
-    
-    inline bool Empty() const { return w == 0;}
+
+    /// length of w. if size == 1, then using w itself to store the value to save
+    /// memory and avoid unnecessary new (see w_0())
+    int size = 1;
+    /// w and V
+    float *w = NULL;
+    /// square root of the cumulative gradient
+    float *sqc_grad = NULL;
+
+    inline float w_0() const { return size == 1 ? *(float *)&w : w[0]; }
+    inline float sqc_grad_0() const {
+      return size == 1 ? *(float *)&sqc_grad : sqc_grad[0];
+    }
+
+    void Load(Stream* fi) {
+    fi->Read(&size, sizeof(size)) ;
+    if (size == 1) {
+      fi->Read(&w, sizeof(float*));
+      fi->Read(&sqc_grad, sizeof(float*));
+    } else {
+      w = new float[size];
+      sqc_grad = new float[size+1];
+      fi->Read(w, sizeof(float)*size);
+      fi->Read(sqc_grad, sizeof(float)*(size+1));
+    }
+  }
+
+    bool Empty() const { return (w_0() == 0 && size == 1); }
   };
 
   void LoadModel(const std::string filename) {
@@ -42,7 +72,16 @@ class Dump {
     int dumped = 0;
     for (const auto& it : data_) {
       if (it.second.Empty()) continue;
-      os << it.first << '\t' << it.second.w << '\n';
+      os << it.first << '\t';
+      os << it.second.size;
+      if (it.second.size == 1) {
+        os << '\t' <<it.second.w << '\t' << it.second.sqc_grad << '\n';
+      } else {
+        for (int i = 0; i < it.second.size; ++i) {
+          os << '\t' << it.second.w[i];
+        }
+        os << '\t' << it.second.sqc_grad_0() << '\n';
+      }
       dumped ++;
     }
     cout << "dumped " << dumped << " kv pairs\n";
@@ -54,7 +93,7 @@ class Dump {
   }
 
  private:
-  unordered_map<K, SGDEntry> data_;
+  unordered_map<K, AdaGradEntry> data_;
   string file_in_;
   string file_out_;
 };

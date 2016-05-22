@@ -13,6 +13,17 @@ where *ℓ* is the loss function such as logistic loss and hinge loss.
 sh run_local.sh
 ```
 
+### Dump format
+
+```
+key    weight  
+76      -0.0548334  
+29      0.323034  
+47      0.0258198  
+0       -0.197926  
+97      -0.0140397  
+```
+
 ## More
 
 - Configuration: [linear](../../doc/learn/linear.rst)
