@@ -108,8 +108,15 @@ struct AdaGradEntry {
   float w = 0;
   float sq_cum_grad = 0;  // sqrt(sum_t grad_t^2)
 
-  inline void Load(Stream *fi) { TLoad(fi, this); }
-  inline void Save(Stream *fo) const { TSave(fo, this); }
+  inline void Load(Stream *fi) { 
+    CHECK_EQ(fi->Read(&w, sizeof(float)), sizeof(float));
+    CHECK_EQ(fi->Read(&sq_cum_grad, sizeof(float)), sizeof(float));
+    ISGDHandle::Update(w, 0);
+  }
+  inline void Save(Stream *fo) const {
+    fo->Write(&w, sizeof(float));
+    fo->Write(&sq_cum_grad, sizeof(float));
+  }
   inline bool Empty() const { return w == 0; }
 };
 
@@ -146,9 +153,19 @@ struct FTRLEntry {
   float w = 0;  // weight
   float z = 0;  // the smoothed version of - eta * w + grad
   float sq_cum_grad = 0; // sqrt(sum_t grad_t^2)
+  bool is_first = true;
 
-  inline void Load(Stream *fi) { TLoad(fi, this); }
-  inline void Save(Stream *fo) const { TSave(fo, this); }
+  inline void Load(Stream *fi) {
+    CHECK_EQ(fi->Read(&w, sizeof(float)), sizeof(float));
+    CHECK_EQ(fi->Read(&z, sizeof(float)), sizeof(float));
+    CHECK_EQ(fi->Read(&sq_cum_grad, sizeof(float)), sizeof(float));
+    ISGDHandle::Update(w, 0);
+  }
+  inline void Save(Stream *fo) const {
+    fo->Write(&w, sizeof(float));
+    fo->Write(&z, sizeof(float));
+    fo->Write(&sq_cum_grad, sizeof(float));
+  }
   inline bool Empty() const { return w == 0; }
 };
 
@@ -174,8 +191,18 @@ struct FTRLHandle : public ISGDHandle {
     Update(val.w, old_w);
   }
 
-  inline void Pull(FeaID key, const FTRLEntry& val, Blob<float>& send) {
+  inline void Pull(FeaID key, FTRLEntry& val, Blob<float>& send) {
+    if (val.is_first) {
+      val.is_first = false;
+      std::random_device rd;
+      std::default_random_engine e(rd());
+      //std::normal_distribution<float> dis(-1.0,1.0);
+      std::uniform_real_distribution<float> dis(0.0,1.0);
+      val.w = send[0] = dis(e) * 0.01; 
+      LOG(INFO) << "PULL WEIGHT: " << send[0];
+    } else {
     send[0] = val.w;
+    }
   }
 };
 

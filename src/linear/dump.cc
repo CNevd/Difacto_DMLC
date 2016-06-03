@@ -16,10 +16,14 @@ class Dump {
   ~Dump() {data_.clear();}
 
   // value type stored on sever nodes, can be also other Entrys
-  struct SGDEntry {
+  struct FTRLEntry {
     float w = 0;
+    float z= 0;
+    float sq_cum_grad = 0;
     inline void Load(Stream *fi) {
       CHECK_EQ(fi->Read(&w, sizeof(float)), sizeof(float));
+      CHECK_EQ(fi->Read(&z, sizeof(float)), sizeof(float));
+      CHECK_EQ(fi->Read(&sq_cum_grad, sizeof(float)), sizeof(float));
     }
     
     inline bool Empty() const { return w == 0;}
@@ -42,7 +46,7 @@ class Dump {
     int dumped = 0;
     for (const auto& it : data_) {
       if (it.second.Empty()) continue;
-      os << it.first << '\t' << it.second.w << '\n';
+      os << it.first << '\t' << it.second.w << '\t' << it.second.z << '\t' << it.second.sq_cum_grad <<'\n';  // check your entry
       dumped ++;
     }
     cout << "dumped " << dumped << " kv pairs\n";
@@ -54,7 +58,7 @@ class Dump {
   }
 
  private:
-  unordered_map<K, SGDEntry> data_;
+  unordered_map<K, FTRLEntry> data_;
   string file_in_;
   string file_out_;
 };
