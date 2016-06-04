@@ -153,7 +153,6 @@ struct FTRLEntry {
   float w = 0;  // weight
   float z = 0;  // the smoothed version of - eta * w + grad
   float sq_cum_grad = 0; // sqrt(sum_t grad_t^2)
-  bool is_first = true;
 
   inline void Load(Stream *fi) {
     CHECK_EQ(fi->Read(&w, sizeof(float)), sizeof(float));
@@ -192,17 +191,7 @@ struct FTRLHandle : public ISGDHandle {
   }
 
   inline void Pull(FeaID key, FTRLEntry& val, Blob<float>& send) {
-    if (val.is_first) {
-      val.is_first = false;
-      std::random_device rd;
-      std::default_random_engine e(rd());
-      //std::normal_distribution<float> dis(-1.0,1.0);
-      std::uniform_real_distribution<float> dis(0.0,1.0);
-      val.w = send[0] = dis(e) * 0.01; 
-      LOG(INFO) << "PULL WEIGHT: " << send[0];
-    } else {
     send[0] = val.w;
-    }
   }
 };
 
