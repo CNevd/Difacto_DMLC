@@ -107,7 +107,8 @@ Range<T> Range<T>::EvenDivide(size_t n, size_t i) const {
   CHECK_LT(i, n);
   auto itv = static_cast<long double>(end_ - begin_) /
              static_cast<long double>(n);
-  return Range(static_cast<T>(begin_+itv*i), static_cast<T>(begin_+itv*(i+1)));
+  long double end_tmp = begin_+itv*(i+1);
+  return Range(static_cast<T>(begin_+itv*i), end_tmp > static_cast<long double>(end_) ? static_cast<T>(end_):static_cast<T>(end_tmp));
 }
 
 template <typename T>
