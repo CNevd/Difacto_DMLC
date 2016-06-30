@@ -264,20 +264,20 @@ struct FTRLEntry{
 	size = 0; w = NULL; sqc_grad = NULL;
     }
     inline void Resize(int n) {
-    if (n < size) { size = n; return; }
+        if (n < size) { size = n; return; }
 
-    float* new_w = new float[n];
-    float* new_cg = new float[n+1];
+        float* new_w = new float[n];
+        float* new_cg = new float[n+1];
 
-    if (size == 1) {
-      new_w[0] = w_0(); new_cg[0] = sqc_grad_0(); new_cg[1] = z_0();
-    } else {
-      memcpy(new_w, w, size * sizeof(float));
-      memcpy(new_cg, sqc_grad, (size+1) * sizeof(float));
-      Clear();
+        if (size == 1) {
+            new_w[0] = w_0(); new_cg[0] = sqc_grad_0(); new_cg[1] = z_0();
+        } else {
+             memcpy(new_w, w, size * sizeof(float));
+             memcpy(new_cg, sqc_grad, (size+1) * sizeof(float));
+             Clear();
+        }
+        w = new_w; sqc_grad = new_cg; size = n;
     }
-    w = new_w; sqc_grad = new_cg; size = n;
-  }
     inline float& w_0() { return size == 1 ? *(float *)&w : w[0]; }
     inline float w_0() const { return size == 1 ? *(float *)&w : w[0]; }
     inline float& sqc_grad_0() {
@@ -310,7 +310,7 @@ struct FTRLEntry{
             fo->Write(sqc_grad, sizeof(float)*(size+1));
         }
     }
-    inline bool Empty() const {return w == 0 && size == 1; }
+    inline bool Empty() const {return (w == 0 && size == 1); }
 
     unsigned fea_cnt = 0;
     int size = 1;
@@ -328,6 +328,7 @@ struct FTRLHandle : public ISGDHandle{
          	 CHECK_LE(recv.size, (size_t)val.size);
                  CHECK_GE(recv.size, (size_t)0);
       		 UpdateW(val, recv[0]);
+		 //std::cout<<"recv.size = "<<recv.size<<std::endl;
      		 if (recv.size > 1) {
        		     UpdateV(val, val.w+1, val.sqc_grad+2, recv.data+1, recv.size-1);
       		 }
@@ -346,64 +347,63 @@ struct FTRLHandle : public ISGDHandle{
    	    }
         }
 
-  /// \brief resize if necessary
-  inline void Resize(FTRLEntry& val) {
-    // resize the larger dim first to avoid double resize
-    if (val.fea_cnt > V.thr && val.size < V.dim + 1 &&
-        (!l1_shrk || val.w_0() != 0)) {
-      int old_siz = val.size;
-      val.Resize(V.dim + 1);
-      for (int j = old_siz; j < val.size; ++j) {
-        val.w[j] = rand() / (float) RAND_MAX * (V.V_max - V.V_min) + V.V_min;
-        val.sqc_grad[j+1] = 0;
-      }
-      new_V += val.size - old_siz;
-    }
-  }
-  // ftrl
-  inline void UpdateW(FTRLEntry& val, float g) {
-    float w = val.w_0();
-    g += lambda_l2 * w;
-    float cg = val.sqc_grad_0();
-    float cg_new = sqrt( cg * cg + g * g );
-    val.sqc_grad_0() = cg_new;
-    val.z_0() -= g - (cg_new - cg) / alpha * w;
-    float z = val.z_0();
-    float l1 = lambda_l1;
-    if (z <= l1  && z >= - l1) {
-      val.w_0() = 0;
-    } else {
-      float eta = (beta + cg_new) / alpha;
-      val.w_0() = (z > 0 ? z - l1 : z + l1) / eta;
-    }
-    if (w == 0 && val.w_0() != 0) {
-      ++ new_w; Resize(val);
-    } else if (w != 0 && val.w_0() == 0) {
-      -- new_w;
-    }
-  }
-    inline void UpdateV(FTRLEntry& val, float* w, float* cg, float const* g, int n) {
-	float* cg_new = new float[n];
-        for (int i = 0; i < n; ++i) {
-            cg_new[i] = sqrt(cg[i] * cg[i] + g[i] * g[i]);
-	    val.sqc_grad_0() = cg_new[i];
- 	    val.z_0() -= g[i] - (cg_new[i] - cg[i]) / alpha * w[i];
-	    float z = val.z_0();
-	    float l1 = V.lambda_l1;
-	    if(z <= l1 && z >= -l1){
-		val.w_0() = 0;
-	    }else{
-                float eta = (V.beta + cg_new[i]) / V.alpha;
-		val.w_0() = (z > 0 ? z - l1 : z + l1) / eta;
-	    }
+        /// \brief resize if necessary
+        inline void Resize(FTRLEntry& val) {
+            // resize the larger dim first to avoid double resize
+            if (val.fea_cnt > V.thr && val.size < V.dim + 1 &&
+            (!l1_shrk || val.w_0() != 0)) {
+                int old_siz = val.size;
+                val.Resize(V.dim + 1);
+                for (int j = old_siz; j < val.size; ++j) {
+                    val.w[j] = rand() / (float) RAND_MAX * (V.V_max - V.V_min) + V.V_min;
+                    val.sqc_grad[j+1] = 0;
+                }
+                new_V += val.size - old_siz;
+            }
+        }
+        // ftrl
+        inline void UpdateW(FTRLEntry& val, float g) {
+            float w = val.w_0();
+            g += lambda_l2 * w;
+            float cg = val.sqc_grad_0();
+            float cg_new = sqrt( cg * cg + g * g );
+            val.sqc_grad_0() = cg_new;
+            val.z_0() -= g - (cg_new - cg) / alpha * w;
+            float z = val.z_0();
+            float l1 = lambda_l1;
+            if (z <= l1  && z >= - l1) {
+                val.w_0() = 0;
+            } else {
+                float eta = (beta + cg_new) / alpha;
+                val.w_0() = (z > 0 ? z - l1 : z + l1) / eta;
+            }
             if (w == 0 && val.w_0() != 0) {
                 ++ new_w; Resize(val);
             } else if (w != 0 && val.w_0() == 0) {
                 -- new_w;
             }
         }
-    }
-
+        inline void UpdateV(FTRLEntry& val, float* w, float* cg, float const* g, int n) {
+	    float* cg_new = new float[n];
+            for (int i = 0; i < n; ++i) {
+                cg_new[i] = sqrt(cg[i] * cg[i] + g[i] * g[i]);
+	        val.sqc_grad_0() = cg_new[i];
+ 	        val.z_0() -= g[i] - (cg_new[i] - cg[i]) / alpha * w[i];
+	        float z = val.z_0();
+	        float l1 = V.lambda_l1;
+	        if(z <= l1 && z >= -l1){
+		    val.w_0() = 0;
+	        }else{
+                    float eta = (V.beta + cg_new[i]) / V.alpha;
+		    val.w_0() = (z > 0 ? z - l1 : z + l1) / eta;
+	        }
+                if (w == 0 && val.w_0() != 0) {
+                    ++ new_w; Resize(val);
+                } else if (w != 0 && val.w_0() == 0) {
+                    -- new_w;
+                }
+            }
+        }
 };//end FTRLHandle
 
 class AsyncServer : public solver::MinibatchServer {
@@ -431,6 +431,7 @@ class AsyncServer : public solver::MinibatchServer {
     h.lambda_l2 = conf_.lambda_l2();
     h.l1_shrk   = conf_.l1_shrk();
     // for V
+    std::cout<<"conf_.embedding_size()"<<conf_.embedding_size()<<std::endl;
     if (conf_.embedding_size() > 0) {
       const auto& c = conf_.embedding(0);
       h.V.dim       = c.dim();

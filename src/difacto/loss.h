@@ -133,6 +133,7 @@ class Loss {
 
       // V.XV = diag(p) * X * V
       size_t n = py_.size();
+    //std::cout<<"n = "<<n<<std::endl;
       CHECK_EQ(V.XV.size(), n * dim);
 #pragma omp parallel for num_threads(nt_)
       for (size_t i = 0; i < n; ++i) {
