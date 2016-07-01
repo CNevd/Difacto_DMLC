@@ -387,19 +387,19 @@ struct FTRLHandle : public ISGDHandle{
 	    float* cg_new = new float[n];
             for (int i = 0; i < n; ++i) {
                 cg_new[i] = sqrt(cg[i] * cg[i] + g[i] * g[i]);
-	        val.sqc_grad_0() = cg_new[i];
- 	        val.z_0() -= g[i] - (cg_new[i] - cg[i]) / alpha * w[i];
-	        float z = val.z_0();
+	        val.sqc_grad[i] = cg_new[i];
+ 		float z = 0.0;
+ 	        z -= g[i] - (cg_new[i] - cg[i]) / alpha * w[i];
 	        float l1 = V.lambda_l1;
 	        if(z <= l1 && z >= -l1){
-		    val.w_0() = 0;
+		    val.w[i] = 0;
 	        }else{
                     float eta = (V.beta + cg_new[i]) / V.alpha;
-		    val.w_0() = (z > 0 ? z - l1 : z + l1) / eta;
+		    val.w[i] = (z > 0 ? z - l1 : z + l1) / eta;
 	        }
-                if (w == 0 && val.w_0() != 0) {
+                if (w[i] == 0 && val.w[i] != 0) {
                     ++ new_w; Resize(val);
-                } else if (w != 0 && val.w_0() == 0) {
+                } else if (w[i] != 0 && val.w[i] == 0) {
                     -- new_w;
                 }
             }
