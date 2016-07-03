@@ -181,6 +181,7 @@ class KVCache : public Customer {
       mu_.unlock();
     };
     msg.set_key(keys);
+    Range<Key>(keys[0],keys[keys.size()-1]).To(msg.task.mutable_key_range());
     msg.task.set_key_channel(chl);
     msg.task.mutable_param()->set_push(false);
     return Submit(&msg);
