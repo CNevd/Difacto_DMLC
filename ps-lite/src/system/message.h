@@ -71,7 +71,7 @@ template <typename T> void Message::set_key(const SArray<T>& key) {
   if (has_key()) clear_key();
   task.set_has_key(true);
   this->key = SArray<char>(key);
-  if (!task.has_key_range()) Range<Key>::All().To(task.mutable_key_range());
+  if (!task.has_key_range()) Range<Key>::All().To(task.mutable_key_range()); 
 }
 
 template <typename T> void Message::add_value(const SArray<T>& value) {
@@ -139,11 +139,11 @@ template <typename K> void SliceMessage(
     pos[i+1] = std::lower_bound(key.begin(), key.end(), k) - key.begin();
 
     Message* ret = (*rets)[i];
+    if (pos[i] == pos[i+1]) ret->valid = false;
     if (ret->valid) {
       ret->set_key(key.Segment(pos[i], pos[i+1]));
     }
   }
-
 
   // slice value and key
   if (dyn_val) {
