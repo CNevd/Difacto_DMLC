@@ -171,12 +171,10 @@ class MinibatchScheduler : public IterScheduler {
       if (is_train) {
         stop = ShowProgress(is_train);
         if (stop) StopDispatch();  // wait all assigned workload finished
+      } else {
+        // print progress for validation
+        stop = ShowProgress(is_train); 
       }
-    }
-
-    // print progress for validation
-    if (!is_train) {
-      stop = ShowProgress(is_train);
     }
     return stop;
   }
