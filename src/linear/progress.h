@@ -12,6 +12,8 @@ struct Progress {
   }
 
   std::string PrintStr() {
+
+    if (data.size() < 6) data.resize(6,0);
     ttl_ex += new_ex();
     nnz_w += new_w();
 
