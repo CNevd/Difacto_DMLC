@@ -68,9 +68,9 @@ class BinClassEval {
 #pragma omp parallel for reduction(+:objv) num_threads(nt_)
     for (size_t i = 0; i < size_; ++i) {
       V y = label_[i] > 0 ? 1 : -1;
-      V score = y * predict_[i]
+      V score = y * predict_[i];
       if (score < -30)
-        objv += -score
+        objv += -score;
       else if (score <= 30)
         objv += log( 1 + exp( - score ));
     }
