@@ -75,7 +75,7 @@ class Dump {
       os << it.first << '\t';
       os << it.second.size;
       if (it.second.size == 1) {
-        os << '\t' <<it.second.w << '\t' << it.second.sqc_grad << '\n';
+        os << '\t' << *(float *)&(it.second.w) << '\t' << *(float *)&(it.second.sqc_grad) << '\n';
       } else {
         for (int i = 0; i < it.second.size; ++i) {
           os << '\t' << it.second.w[i];
