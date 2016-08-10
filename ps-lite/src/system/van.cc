@@ -231,25 +231,24 @@ bool Van::Recv(Message* msg, size_t* recv_bytes) {
       CHECK(msg->task.ParseFromArray(buf, size))
           << "failed to parse string from " << msg->sender
           << ". this is " << my_node_.id() << " " << size;
-      // ZMQ_IDENTITY_FD is not availabe after zmq-4.0.1-rc1
-      // if (IsScheduler() && msg->task.has_ctrl() &&
-      //     msg->task.ctrl().cmd() == Control::REGISTER_NODE) {
-      //   // it is the first time the scheduler receive message from the
-      //   // sender. store the file desciptor of the sender for the monitor
-      //   int val[64]; size_t val_len = msg->sender.size();
-      //   CHECK_LT(val_len, 64*sizeof(int));
-      //   memcpy(val, msg->sender.data(), val_len);
-      //   CHECK(!zmq_getsockopt(
-      //       receiver_,  ZMQ_IDENTITY_FD, (char*)val, &val_len))
-      //       << "failed to get the file descriptor of " << msg->sender
-      //       << ". error: " << errno << " " << zmq_strerror(errno);
-      //   CHECK_EQ(val_len, (size_t)4);
-      //   int fd = val[0];
+       if (IsScheduler() && msg->task.has_ctrl() &&
+         msg->task.ctrl().cmd() == Control::REGISTER_NODE) {
+         // it is the first time the scheduler receive message from the
+         // sender. store the file desciptor of the sender for the monitor
+         int val[64]; size_t val_len = msg->sender.size();
+         CHECK_LT(val_len, 64*sizeof(int));
+         memcpy(val, msg->sender.data(), val_len);
+         CHECK(!zmq_getsockopt(
+             receiver_,  ZMQ_IDENTITY_FD, (char*)val, &val_len))
+             << "failed to get the file descriptor of " << msg->sender
+             << ". error: " << errno << " " << zmq_strerror(errno);
+         CHECK_EQ(val_len, (size_t)4);
+         int fd = val[0];
 
-      //   VLOG(1) << "node [" << msg->sender << "] is on file descriptor " << fd;
-      //   Lock l(fd_to_nodeid_mu_);
-      //   fd_to_nodeid_[fd] = msg->sender;
-      // }
+         VLOG(1) << "node [" << msg->sender << "] is on file descriptor " << fd;
+         Lock l(fd_to_nodeid_mu_);
+         fd_to_nodeid_[fd] = msg->sender;
+       }
       zmq_msg_close(zmsg);
       if (!zmq_msg_more(zmsg)) break;
       delete zmsg;
