@@ -126,6 +126,7 @@ class KVStoreSparseST : public KVStore {
       if (it.second.Empty()) continue;
       fo->Write(&it.first, sizeof(K));
       it.second.Save(fo);
+      saved++;
     }
     LOG(INFO) << "saved " << saved << " kv pairs";
   }
