@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "dmlc/io.h"
 #include "dmlc/logging.h"
-
+#include "base/localizer.h"
 using namespace std;
 using namespace dmlc;
 typedef int64_t K;
@@ -12,7 +12,7 @@ class Dump {
  
  public:
 
-  Dump(string file_in, string file_out) : file_in_(file_in),file_out_(file_out) {}
+  Dump(string file_in, string file_out, bool need_inverse) : file_in_(file_in),file_out_(file_out), need_inverse_(need_inverse) {}
   ~Dump() {data_.clear();}
 
   // value type stored on sever nodes, can be also other Entrys
@@ -72,7 +72,8 @@ class Dump {
     int dumped = 0;
     for (const auto& it : data_) {
       if (it.second.Empty()) continue;
-      os << it.first << '\t';
+      uint64_t feature_id = need_inverse_ ? ReverseBytes(it.first) : it.first;
+      os << feature_id << '\t';
       os << it.second.size;
       if (it.second.size == 1) {
         os << '\t' << *(float *)&(it.second.w) << '\t' << *(float *)&(it.second.sqc_grad) << '\n';
@@ -96,23 +97,26 @@ class Dump {
   unordered_map<K, AdaGradEntry> data_;
   string file_in_;
   string file_out_;
+  bool need_inverse_;
 };
 
 int main(int argc, char *argv[]) {
   if (argc < 3) {
-    cout << "Usage: <model_in> <dump_out>\n";
+    cout << "Usage: <model_in> <dump_out> [need_inverse]\n";
     return 0;
   }
   google::InitGoogleLogging(argv[0]);
   string model_in, dump_out;
+  bool need_inverse = false;
   for (int i = 1; i < argc; ++i) {
     char name[256], val[256];
     if (sscanf(argv[i], "%[^=]=%s", name, val) == 2) {
       if (!strcmp(name, "model_in")) model_in = val;
       if (!strcmp(name, "dump_out")) dump_out = val;
+      if (!strcmp(name, "need_inverse")) need_inverse = !strcmp(val, "0") ? false : true;
     }
   }
-  Dump d(model_in, dump_out);
+  Dump d(model_in, dump_out, need_inverse);
   d.run();
   return 0;
 }
