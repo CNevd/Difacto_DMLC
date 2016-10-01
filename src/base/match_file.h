@@ -53,6 +53,7 @@ inline void MatchFile_single(const std::string& pattern,
     if (regexec(&pat, file.c_str(), 1, m, 0)) continue;
     matched->push_back(file);
   }
+  regfree(&pat);
 }
 
 inline void MatchFile(const std::string& pattern,
