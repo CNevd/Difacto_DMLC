@@ -155,7 +155,7 @@ message Config {
 
   /// cache the key list on both sender and receiver to reduce communication
   /// cost. it may increase the memory usage
-  optional bool key_cache = 123 [default = true];
+  optional bool key_cache = 123 [default = false];
 
   /// compression the message to reduce communication cost. it may increase the
   /// computation cost.
