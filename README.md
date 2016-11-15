@@ -33,18 +33,16 @@ Build & Run
 
 Questions
 ====
-* How to set multipath?
-  if you have date paths like: `./data/train1` `./data/train2`
-  pls set `train_data = "./data/train1;./data/train2"` or `"./data/train.*"`
-  for hdfsfiles: `train_data = "hdfs://data/train1;hdfs://data/train2"` or `"hdfs://data/train.*"`
-* How to use HDFS?
-  set `USE_HDFS=1` in [dmlc-core/make/config.mk](dmlc-core/make/config.mk) and [ps-lite/make/config.mk](ps-lite/make/config.mk)
-* How to get readable weight?
-  use `./build/dump.dmlc model_in=your_model_path(should be local file) dump_out=dump_file need_inverse=1(0 or 1)` then dump_file is the readable we
-ight
-* dump error when use hdfs: `./build/dump.dmlc: error while loading shared libraries: libhdfs.so.0.0.0: cannot open shared object file: No such file
- or directory`?
-  pls add hadoop lib path to LD_LIBRARY_PATH before dump
-  in my case: `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/clusterserver/hadoop/lib/native/`
-* Why the ids of dumped file is large like `-2305843009213693952` and how to use the original ids?
+* How to set multipath?  
+  if you have date paths like: `./data/train1` `./data/train2`  
+  pls set `train_data = "./data/train1;./data/train2"` or `"./data/train.*"`  
+  for hdfsfiles: `train_data = "hdfs://data/train1;hdfs://data/train2"` or `"hdfs://data/train.*"`  
+* How to use HDFS?  
+  set `USE_HDFS=1` in [dmlc-core/make/config.mk](dmlc-core/make/config.mk) and [ps-lite/make/config.mk](ps-lite/make/config.mk)  
+* How to get readable weight?  
+  use `./build/dump.dmlc model_in=your_model_path(should be local file) dump_out=dump_file need_inverse=1(0 or 1)` then dump_file is the readable weight  
+* dump error when use hdfs: `./build/dump.dmlc: error while loading shared libraries: libhdfs.so.0.0.0: cannot open shared object file: No such file or directory`?  
+  pls add hadoop lib path to LD_LIBRARY_PATH before dump  
+  in my case: `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/clusterserver/hadoop/lib/native/`  
+* Why the ids of dumped file is large like `-2305843009213693952` and how to use the original ids?  
   see [issue8](https://github.com/CNevd/Difacto_DMLC/issues/8) and [issue10](https://github.com/CNevd/Difacto_DMLC/issues/10)
