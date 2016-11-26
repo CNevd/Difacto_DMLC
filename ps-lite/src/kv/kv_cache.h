@@ -89,8 +89,7 @@ class KVCache : public Customer {
         kv.recv.push_back(std::make_pair(recv_key[0], SArray<V>(msg->value[0])));
       }
 
-      kv.recv_num ++;
-      if (kv.recv_num != sys_.manager().num_servers()) return;
+      if (kv.matched_num != kv.key.size()) return;
 
       // CHECK_EQ(kv.matched_num, kv.key.size());
       std::sort(kv.recv.begin(), kv.recv.end(), [](
