@@ -7,7 +7,7 @@
 
 using namespace std;
 using namespace dmlc;
-typedef int64_t K;
+typedef uint64_t K;
 
 class Dump {
  
