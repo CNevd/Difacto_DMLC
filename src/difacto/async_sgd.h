@@ -334,6 +334,7 @@ class AsyncServer : public solver::MinibatchServer {
     Progress prog;
     prog.new_w() = ISGDHandle::new_w; prog.new_V() = ISGDHandle::new_V;
     ReportToScheduler(prog.data);
+    ISGDHandle::new_w = 0; ISGDHandle::new_V = 0;
   }
 
   virtual void SaveModel(Stream* fo) const {
