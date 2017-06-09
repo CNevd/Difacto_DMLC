@@ -249,6 +249,7 @@ class AsgdWorker : public solver::MinibatchWorker {
     shuffle_       = conf_.rand_shuffle();
     concurrent_mb_ = conf_.max_concurrency();
     neg_sampling_  = conf_.neg_sampling();
+    nt_            = conf_.num_threads();
   }
   virtual ~AsgdWorker() { }
 
