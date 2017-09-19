@@ -250,8 +250,9 @@ bool Van::Recv(Message* msg, size_t* recv_bytes) {
          fd_to_nodeid_[fd] = msg->sender;
        }
       zmq_msg_close(zmsg);
-      if (!zmq_msg_more(zmsg)) break;
+      bool more = zmq_msg_more(zmsg);
       delete zmsg;
+      if (!more) break;
     } else {
       // copy data
       // SArray<char> data; data.CopyFrom(buf, size);
