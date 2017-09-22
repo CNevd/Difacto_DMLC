@@ -17,15 +17,12 @@ class Dump {
 
   // value type stored on sever nodes, can be also other Entrys
   struct AdaGradEntry {
-
     AdaGradEntry() { }
     ~AdaGradEntry() { Clear(); }
-
     inline void Clear() {
       if ( size > 1 ) { delete [] w; delete [] sqc_grad; }
       size = 0; w = NULL; sqc_grad = NULL;
     }
-
     /// length of w. if size == 1, then using w itself to store the value to save
     /// memory and avoid unnecessary new (see w_0())
     int size = 1;
@@ -38,7 +35,6 @@ class Dump {
     inline float sqc_grad_0() const {
       return size == 1 ? *(float *)&sqc_grad : sqc_grad[0];
     }
-
     void Load(Stream* fi) {
     fi->Read(&size, sizeof(size)) ;
     if (size == 1) {
@@ -51,7 +47,6 @@ class Dump {
       fi->Read(sqc_grad, sizeof(float)*(size+1));
     }
   }
-
     bool Empty() const { return (w_0() == 0 && size == 1); }
   };
 

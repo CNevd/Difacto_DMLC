@@ -4,6 +4,8 @@
 #include "config.pb.h"
 #include "dmlc/data.h"
 #include "dmlc/io.h"
+#include <iostream>
+
 namespace dmlc {
 namespace difacto {
 
@@ -26,13 +28,15 @@ class Loss {
        const std::vector<int>& model_siz,
        const Config& conf) {
     nt_ = conf.num_threads();
-
     // init w
+    //std::cout<<model_siz.size()<<std::endl;
     w.Load(0, data, model, model_siz);
-
     // init V
+    //
+    //std::cout<<conf.embedding_size()<<"-------------------"<<std::endl;
     if (conf.embedding_size() == 0) return;
     const auto& cf = conf.embedding(0);
+    //std::cout<<cf.dim()<<"-------------------"<<std::endl;
     if (cf.dim() == 0) return;
     V.Load(cf.dim(), data, model, model_siz);
     V.dropout            = cf.dropout();
@@ -67,11 +71,9 @@ class Loss {
       CHECK_EQ(vv.size(), V.pos.size() * V.dim);
       std::vector<T> xxvv(V.X.size * V.dim);
       SpMM::Times(V.XX, vv, &xxvv, nt_);
-
       // V.XV = X*V
       V.XV.resize(xxvv.size());
       SpMM::Times(V.X, V.weight, &V.XV, nt_);
-
       // py += .5 * sum((V.XV).^2 - xxvv)
 #pragma omp parallel for num_threads(nt_)
       for (size_t i = 0; i < py_.size(); ++i) {
@@ -131,6 +133,7 @@ class Loss {
 
       // V.XV = diag(p) * X * V
       size_t n = py_.size();
+    //std::cout<<"n = "<<n<<std::endl;
       CHECK_EQ(V.XV.size(), n * dim);
 #pragma omp parallel for num_threads(nt_)
       for (size_t i = 0; i < n; ++i) {
@@ -217,7 +220,6 @@ class Loss {
         }
       }
       if (weight.empty()) return;
-
       // init X
       if (dim == 0) {  // w
         X = data;
@@ -240,7 +242,6 @@ class Loss {
         X.value = BeginPtr(val_);
         X.index = BeginPtr(idx);
       }
-
       // init XX
       XX = X;
       if (X.value) {
